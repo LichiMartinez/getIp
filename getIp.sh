@@ -18,7 +18,6 @@ function helpPanel(){
         echo -e "\t${purpleColour}-i ${redColour}interface:${endColour} Returns the interface ip and copies it to the clipboard"
         echo -e "\t${purpleColour}-l:${endColour} Lists all available interfaces"
         echo -e "\t${purpleColour}-a:${endColour} List of all available interfaces with their ip"
-
 }
 
 function getInterfaces(){
@@ -27,16 +26,18 @@ function getInterfaces(){
 
 # Main Function
 
-getInterfaces
+if [ -z $1 ]; then helpPanel; exit 1; fi
 declare -i parameter_counter=0; while getopts "hlai:" arg; do
 	case $arg in
 		l)
+                        getInterfaces
                         while read -r line;
                         do 
                           echo -e "$yellowColour [+]$endColour $line"
                         done < getIp.tmp
                         ;;
 		i)
+                        getInterfaces
                         i=$OPTARG
                         inter=$(cat getIp.tmp | grep $i)
                         if [ $(echo $?) == 0 ]; then
@@ -48,6 +49,7 @@ declare -i parameter_counter=0; while getopts "hlai:" arg; do
                         fi
                         ;;
                 a)
+                        getInterfaces
                         while read -r line;
                         do
                                 echo -e "${yellowColour} [+]${endColour} ${line}@[IP]: $(ifconfig $line |awk '{if (NR==2) print $2}')" 
@@ -55,7 +57,12 @@ declare -i parameter_counter=0; while getopts "hlai:" arg; do
                         ;;
 		h)
                         helpPanel
-			exit 1
-	esac
+			exit 0
+                        ;;
+                *)
+                        helpPanel
+                        exit 1
+          esac
 done
 rm getIp.tmp
+exit 0
